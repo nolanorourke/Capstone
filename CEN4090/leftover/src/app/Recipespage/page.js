@@ -26,7 +26,7 @@ const UserPage = () => {
       credentials: 'include',
     });
     if (response.ok) {
-      window.location.href = '/recipe'; // Navigate to the recipe details page
+      window.location.href = '/recipe'; 
     } else {
       alert("Failed to select recipe");
     }
@@ -48,14 +48,14 @@ const UserPage = () => {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center', // Vertically center in the viewport
-    height: '100vh', // Use the full height of the viewport
-    paddingTop: '100px', // Move everything down a bit
+    justifyContent: 'center', 
+    height: '100vh', 
+    paddingTop: '100px',
   };
 
   const sectionStyle = {
     width: '100%',
-    maxWidth: '600px', // Limiting the maximum width
+    maxWidth: '600px', 
     height: '700px',
     overflowY: 'auto',
     padding: '20px',
