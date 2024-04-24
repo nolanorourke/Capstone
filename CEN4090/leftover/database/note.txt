@@ -1,0 +1,103 @@
+-- The users table, username is the primary key(must be unique)
+-- first and last name are character entries
+-- email address could also be a primary key but will be used for login
+-- user password will be a hashed version of their pasword to ensure Authorization is correct
+CREATE TABLE Users(
+    username SERIAL PRIMARY KEY,
+    email_address VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    user_password VARCHAR(255) NOT NULL
+);
+
+
+-- Create separate table for the three roles we have
+CREATE TABLE Roles(
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(20) NOT NULL
+);
+
+
+--create a table that define relationship users have with their roles
+CREATE TABLE User_Roles(
+    user_id SERIAL,           -- same this as username in the Users table
+    role_id SERIAL, 
+    FOREIGN KEY (user_id) REFERENCES Users(username),
+    FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+);
+--Food Tables**************************************************************************************************
+-- Food is all the options, ingredients is where they will be used by the recipes
+-- foodname will be a unique name for food
+-- food type would be things like dairy, meat, grain, etc
+CREATE TABLE Foods(
+    food_name VARCHAR(255) NOT NULL,
+    food_type VARCHAR(255) NOT NULL
+);
+
+-- Ingredients uses foods table to get an instance, and assigns it values like measurement and amount
+-- -- and this allows it to be used by recipes and store in a users pantry
+-- CREATE TABLE Ingredients(
+--     ing_name VARCHAR(255) NOT NULL,
+--     quantity FLOAT(40,2) NOT NULL,
+--     measurement varchar(8) NULL,
+--     FOREIGN KEY (food_name) REFERENCES Foods(food_name)
+-- );
+
+--Recipe tables**************************************************************************************************
+--
+CREATE TABLE Recipes(
+    recipe_id SERIAL PRIMARY KEY,
+    recipe_name VARCHAR(255),
+    time_added DATE NOT NULL,
+    author SERIAL,
+    FOREIGN KEY (author) REFERENCES Users(username)
+);
+
+CREATE TABLE Recipe_Foods(
+    recipe_id SERIAL,
+    food_name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (recipe_id) REFERENCES Recipes(recipe_id),
+    FOREIGN KEY (food_name) REFERENCES Foods(food_name)
+);
+
+CREATE TABLE Recipe_Ingredients(
+    recipe_id SERIAL,
+    ing_name VARCHAR(255) NOT NULL,
+    quantity FLOAT NOT NULL,
+    measurement varchar(8) NULL,
+    FOREIGN KEY (recipe_id) REFERENCES Recipes(recipe_id),
+    FOREIGN KEY (ing_name) REFERENCES Recipe_Foods(food_name)
+);
+
+CREATE TABLE Steps(
+    step_id SERIAL PRIMARY KEY,
+    recipe_id SERIAL,
+    step_description TEXT NOT NULL,
+    step_number INT NOT NULL,
+    FOREIGN KEY (recipe_id) REFERENCES Recipes(recipe_id)
+);
+
+--Pantry tables**************************************************************************************************
+-- associating a pantry with a user
+CREATE TABLE Pantry(
+    pantry_id SERIAL PRIMARY KEY,
+    ownername VARCHAR(255),
+    FOREIGN KEY (ownername) REFERENCES Users(username),
+);
+
+CREATE TABLE Pantry_Food(
+    pantry_id SERIAL,
+    food_name VARCHAR(255)
+    FOREIGN KEY (pantry_id) REFERENCES Pantry(pantry_id),
+    FOREIGN KEY (food_name) REFERENCES Foods(food_name)
+);
+-- associating the table for ingredients 
+CREATE TABLE Pantry_Ingredients(
+    pantry_id SERIAL,
+    ing_name VARCHAR(255) NOT NULL,
+    quantity FLOAT NOT NULL,
+    measurement VARCHAR(8) NULL,
+    FOREIGN KEY (pantry_id) REFERENCES Pantry(pantry_id),
+    FOREIGN KEY (ing_name) REFERENCES Pantry_Food(food_name)
+);
+
