@@ -122,6 +122,7 @@ def remove_food():
         cur.close()
         conn.close()
 
+#defines what happens when we make this call
 @app.route('/getReports', methods=['GET'])
 def get_reports():
     if 'username' not in session:
@@ -132,12 +133,12 @@ def get_reports():
     cur = conn.cursor()
 
     try:
-        # Query the database to retrieve recipes created by the chef
-        cur.execute("SELECT report_id, title FROM Reports")
+        # Query the database to retrieve report submitted
+        cur.execute("SELECT report_id, title, FROM Reports")
         reports = cur.fetchall()
 
         # Construct the response JSON
-        submitted_reports = [{'report_id': reports[0], 'title': reports[1]} for report in submitted_reports]
+        submitted_reports = [{'report_id': report[0], 'title': report[1]} for report in submitted_reports]
 
         return jsonify(submitted_reports), 200
     except Exception as e:
