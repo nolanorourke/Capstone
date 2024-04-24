@@ -13,7 +13,7 @@ Leftover is way to digitally keep track of what ingredients you have availabe wh
 - Ryan Ly - [@kaosu01](https://github.com/kaosu01)
   - Front End and Backend functionality (Admin and cleanup)
 - Nolan O'Rourke - [@nolanorourke](https://github.com/nolanorourke)
-  - Database creation and initialization (PostgreSQL)
+  - Database creation and initialization (PostgreSQL) and Report System
 
 ## Features
 
@@ -24,7 +24,8 @@ Leftover is way to digitally keep track of what ingredients you have availabe wh
 - Login / Logout functionality
 - User input storage
 - Role Based Access
-
+- **Report System**
+- **Filter Foods**
 
 ## Run Locally
 
@@ -114,9 +115,11 @@ The background color is `#ffffff`
 ### Reipe Page
 * The recipe page lists all ingredients at the top, and all steps below it
 * It also displays the name of the author of the recipe
+* Report system - allows users to send report to admin
 
 ### Admin Page
 * Admin page has the user dashboard as well, they are also able to revoke chef proviliges, and add food items to the database
+* able to access reports sent from users
 
 ## Included Libraries
 * flask_cors
