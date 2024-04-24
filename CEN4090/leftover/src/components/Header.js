@@ -96,6 +96,9 @@ async function logoutUser() {
           <>
             {user.role === 'admin' && (
               <>
+                <li key='13' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                  <Link href="/Recipespage">Recipes</Link>
+                </li>
                 <li key='3' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
                   <Link href="/adminpage">Admin</Link>
                 </li>
@@ -109,6 +112,9 @@ async function logoutUser() {
             )}
             {user.role === 'chef' && (
               <>
+                <li key='14' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                  <Link href="/Recipespage">Recipes</Link>
+                </li>
                 <li key='6' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
                   <Link href="/chef">Chef</Link>
                 </li>
@@ -123,9 +129,12 @@ async function logoutUser() {
             {user.role === 'customer' && (
               <>
                 <li key='9' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
-                  <Link href="/user">{user.username}</Link>
+                  <Link href="/Recipespage">Recipes</Link>
                 </li>
                 <li key='10' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                  <Link href="/user">{user.username}</Link>
+                </li>
+                <li key='11' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
                   <button onClick={logoutUser}>Logout</button>
                 </li>
               </>
@@ -162,6 +171,9 @@ async function logoutUser() {
             <>
               {user.role === 'admin' && (
                 <>
+                  <li key='13' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                  <Link href="/Recipespage" onClick={() => setNav(false)}>Recipes</Link>
+                  </li>
                   <li key='3' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
                     <Link href="/adminpage" onClick={() => setNav(false)}>Admin</Link>
                   </li>
@@ -175,6 +187,9 @@ async function logoutUser() {
               )}
               {user.role === 'chef' && (
                 <>
+                  <li key='14' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                  <Link href="/Recipespage" onClick={() => setNav(false)}>Recipes</Link>
+                  </li>
                   <li key='6' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
                     <Link href="/chef" onClick={() => setNav(false)}>Chef</Link>
                   </li>
@@ -188,10 +203,13 @@ async function logoutUser() {
               )}
               {user.role === 'customer' && (
                 <>
-                  <li key='9' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
-                    <Link href="/user" onClick={() => setNav(false)}>{user.username}</Link>
+                <li key='9' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                <Link href="/Recipespage" onClick={() => setNav(false)}>Recipes</Link>
                   </li>
                   <li key='10' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
+                    <Link href="/user" onClick={() => setNav(false)}>{user.username}</Link>
+                  </li>
+                  <li key='11' className="nav-links px-4 cursor-pointer capitalize font-medium text-gray-500 hover:scale-105 hover:text-white duration-200 link-underline">
                     <button onClick={logoutUser}>Logout</button>
                   </li>
                 </>

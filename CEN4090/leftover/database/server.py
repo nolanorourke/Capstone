@@ -504,6 +504,7 @@ def get_available_recipes():
     finally:
         cur.close()
         conn.close()
+        
 
 @app.route('/select_recipe/<int:recipe_id>', methods=['POST'])
 def select_recipe(recipe_id):
@@ -661,6 +662,24 @@ def welcome_user():  # Removed the username parameter
         return jsonify(user_info)
     else:
         return jsonify({'error': 'User not found'}), 404
+    
+@app.route('/recipes/all', methods=['GET'])
+def get_all_recipes():
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT recipe_id, recipe_name FROM Recipes")
+        recipes = [{'recipe_id': row[0], 'recipe_name': row[1]} for row in cur.fetchall()]
+        return jsonify(recipes)
+    except Exception as e:
+        print(f"Error fetching all recipes: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+    finally:
+        cur.close()
+        conn.close()
     
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
