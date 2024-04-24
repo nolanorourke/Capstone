@@ -137,32 +137,6 @@ def remove_food():
         cur.close()
         conn.close()
 
-#defines what happens when we make this call
-@app.route('/getReports', methods=['GET'])
-def get_reports():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    username = session['username']
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    try:
-        # Query the database to retrieve report submitted
-        cur.execute("SELECT report_id, title, FROM Reports")
-        reports = cur.fetchall()
-
-        # Construct the response JSON
-        submitted_reports = [{'report_id': report[0], 'title': report[1]} for report in submitted_reports]
-
-        return jsonify(submitted_reports), 200
-    except Exception as e:
-        print(f"Error fetching submitted reports: {e}")
-        return jsonify({'error': 'Internal Server Error'}), 500
-    finally:
-        cur.close()
-        conn.close()
-
 @app.route('/pantry/items', methods=['GET'])
 def get_pantry_items():
     if 'username' not in session:
@@ -592,3 +566,101 @@ def get_recipe_details():
     finally:
         cur.close()
         conn.close()
+
+# This is our pages for which we need the users to stay on
+@app.route('/login', methods=['POST'])
+def login_user():
+    print("On Login Page")
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # Extract form data from the request
+    data = request.json
+    try:
+        # Check if the username exists
+        cur.execute("SELECT rolname, rolpassword FROM pg_authid WHERE rolname = '" + str(data['username']) + "'")
+        existing_user = cur.fetchone()
+        print(data)
+        if existing_user:
+            print("User Exists, Check Password")
+            # Encrypt the Password, Concatenated w/ 'md5'
+            hashed_pw = str(data['password']) + str(data['username'])
+            hashed_pw = hashlib.md5(hashed_pw.encode())
+            hashed_pw = hashed_pw.hexdigest()
+            hashed_pw = 'md5' + hashed_pw
+            # Check if the password is correct
+            if existing_user[1] == hashed_pw:
+                session['username'] = data['username']
+                return {'message': 'Login successful', 'username': data['username']}, 200
+            else:
+                return {'message': 'Incorrect password'}, 401  # Unauthorized
+        else:
+            return {'message': 'User not found'}, 404  # Not Found
+    except Exception as e:
+        return {'message': 'Internal Server Error', 'error': str(e)}, 500  # Internal Server Error
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    print("On Register Page")
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # Extract form data from the request
+    data = request.json
+    try:
+        print("Trying SELECT Query to Find Identical User")
+        cur.execute(
+            "SELECT usename FROM pg_user WHERE usename = '" + str(data['username']) + "'")
+        existing_user = cur.fetchone()
+        print("Fetched User")
+        if existing_user:
+            print("Username Taken")
+            return jsonify({'message': 'username already taken'}), 403
+        else:
+            print("Username Not Taken")
+            cur.execute("CREATE USER \"" + str(data['username']) + "\" WITH PASSWORD '" + str(data['password']) + "'")
+            conn.commit()
+            print("Executed CREATE USER Query")
+            if data['isChef'] is True:
+                cur.execute("GRANT chef TO \"" + str(data['username']) + "\"")
+            else:
+                cur.execute("GRANT customer TO \"" + str(data['username']) + "\"")
+            conn.commit()
+            print("Executed GRANT Permissions Query")
+            cur.execute("INSERT INTO Users(username, email_address, first_name, last_name) \
+                        VALUES ('" + str(data['username']) + "', '" + str(data['email']) + "', '" \
+                        + str(data['firstName']) + "', '" + str(data['lastName']) + "')")
+            conn.commit()
+            print("Executed INSERT Query")
+            cur.execute("INSERT INTO Pantry(ownername) VALUES (%s)", (data['username'],))
+            conn.commit()
+            print("Pantry created for user")
+            session['username'] = data['username']
+            print("Created User")
+            return jsonify({'message': 'User created successfully', 'username': data['username']}), 201
+    except Exception as e:
+        conn.rollback()
+        return {'Error': str(e)}, 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/user', methods=['GET'])
+def welcome_user():  # Removed the username parameter
+    # First, check if the user is logged in by looking in the session.
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    username = session['username']  # Correctly fetch the username from the session
+
+    # Fetch the user-specific information.
+    user_info = get_user_info(username)
+    
+    if user_info:
+        return jsonify(user_info)
+    else:
+        return jsonify({'error': 'User not found'}), 404
+    
+if __name__ == '__main__':
+    app.run(debug=True, port=8080)
