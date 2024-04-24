@@ -1,12 +1,15 @@
+
 // pages/welcome.js
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
 
 const UserPage = () => {
   const [foods, setFoods] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [pantryItems, setPantryItems] = useState([]);
   const [availableRecipes, setAvailableRecipes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(''); // State to hold the search term
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchPantryItems = useCallback(async () => {
     const response = await fetch('http://localhost:8080/pantry/items', {
@@ -19,6 +22,19 @@ const UserPage = () => {
       console.error('Failed to fetch pantry items');
     }
   }, []);
+
+  const fetchCategories = useCallback(async () => {
+    const response = await fetch('http://localhost:8080/food_category', {
+      credentials: 'include',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setCategories(data);
+    } else {
+      console.error('Failed to fetch categories');
+    }
+  }, []);
+
   const fetchAvailableRecipes = useCallback(async () => {
     const response = await fetch('http://localhost:8080/recipes/available', {
       credentials: 'include',
@@ -45,6 +61,7 @@ const UserPage = () => {
     };
 
     fetchFoods();
+    fetchCategories();
     fetchPantryItems();
     fetchAvailableRecipes(); 
   }, [fetchPantryItems, fetchAvailableRecipes]);
@@ -95,12 +112,17 @@ const UserPage = () => {
       console.error('Failed to remove food from pantry');
     }
   };
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+  };
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredFoods = foods.filter(food =>
-    food.food_name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFoods = foods.filter(food => 
+    food.food_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (selectedCategory ? food.food_type === selectedCategory : true)
   );
 
   const sectionContainerStyle = {
@@ -159,13 +181,34 @@ const UserPage = () => {
       <div style={sectionContainerStyle}>
         <div style={sectionStyle}>
           <h2>Ingredients</h2>
-          <input
-            type="text"
-            placeholder="Search foods..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            style={inputStyle}
-          />
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <input
+              type="text"
+              placeholder="Search foods..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              style={inputStyle}
+            />
+            <select
+              onChange={handleCategoryChange}
+              value={selectedCategory}
+              style={{
+                flex: 1,
+                width: '100px',
+                height: '47px',
+                padding: '0px',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                backgroundColor: 'white',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="">All</option>
+              {categories.map((category, index) => (
+                <option key={index} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
           <div style={{ overflowY: 'auto' }}>
             {filteredFoods.map((food, index) => (
               <div key={index} style={itemStyle}>
