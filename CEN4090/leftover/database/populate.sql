@@ -729,9 +729,9 @@ INSERT INTO Recipe_Ingredients (recipe_id, ing_name, quantity, measurement) VALU
 (3, 'Sesame Seeds', 1, 'teaspoon'),
 (3, 'Pickle', 1, 'pickle'),
 (3, 'Sea Cheese', 2, 'slices'),
-(3, 'Ketchup', 0.5, 'tablespoon'),
-(3, 'Mustard', 0.5, 'tablespoon'),
-(3, 'Mayonnaise', 0.5,'tablespoon');
+(3, 'Ketchup', 0.5, 'tbsp'),
+(3, 'Mustard', 0.5, 'tbsp'),
+(3, 'Mayonnaise', 0.5,'tbsp');
 
 
 INSERT INTO Steps (recipe_id, step_description, step_number) VALUES

@@ -46,6 +46,10 @@ const RecipePage = () => {
       <div style={{ marginTop: '20px', textAlign: 'center', paddingTop: '10px', borderTop: '2px solid #eee' }}>
         <p>Recipe by: <strong>{recipeDetails.author}</strong></p>
       </div>
+      <div style={{ position: 'absolute', bottom: '10px', right: '10px', display: 'flex', alignItems: 'center' }}>
+        <img src="./warning.png" alt="Report" style={{ width: '20px', marginRight: '5px' }} />
+        <button onClick = {()=> reportRecipe(recipeDetails.recipe_id, recipeDetails.author, )}>Report this recipe</button>
+      </div>
     </div>
   );
 };

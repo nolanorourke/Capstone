@@ -711,6 +711,19 @@ def select_report(report_id):
         print("Failed to select report, no username in session")  # Identify failure
         return jsonify({'error': 'Unauthorized'}), 401
 
+@app.route('/getreports', methods=['GET'])
+def get_reports():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT title, rolname \
+                FROM pg_user \
+                INNER JOIN pg_auth_members ON pg_user.usesysid = pg_auth_members.member \
+                INNER JOIN pg_roles ON pg_roles.oid = pg_auth_members.roleid \
+                WHERE pg_roles.rolname = 'chef'")
+    chefs = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify([{'user_name': chef[0], 'role': chef[1]} for chef in chefs])
 
 
 

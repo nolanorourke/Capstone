@@ -15,7 +15,8 @@ const AdminPage = () => {
   const [recipesearchTerm, setrecipesearchTerm] = useState('');
   const [usersearchTerm, setusersearchTerm] = useState('');
   const [chefsearchTerm, setchefsearchTerm] = useState('');
-  const [availableReports, setAvailableReports] = useState('');
+  const [reportsearchTerm, setreportsearchTerm] = useState('');
+  //const [availableReports, setAvailableReports] = useState('');
 
   const handlefoodChange = (event) => {
     const { name, value } = event.target;
@@ -41,6 +42,10 @@ const AdminPage = () => {
     const { value } = event.target;
     setingredientsearchTerm(value);
   };  
+  const handleReportChange = (event) =>{
+    const {value} = event.target;
+    setreportsearchTerm(value);
+  }
 
    const handleSubmit = async (event) => {
     event.preventDefault();
@@ -127,6 +132,23 @@ const AdminPage = () => {
     fetchChefs();
   }, []);
 
+  const fetchReports = async() =>{
+    const response = await fetch('http://localhose:8080', {
+      credentials: 'include',
+    });
+    if (response.ok){
+      const data = await response.json();
+      setReports(data);
+    }
+    else
+    {
+      console.error('Failed to fetch Reports')
+    }
+  }
+  useEffect(() =>{
+    fetchReports();
+}, []);
+
   const deleteFromFoods = async(foodName) => {
     const response = await fetch('http://localhost:8080/deleteingredient', {
       method: 'POST',
@@ -169,6 +191,7 @@ const AdminPage = () => {
       fetchChefs();
       fetchCustomers();
       fetchRecipes();
+      fetchReports();
     } else {
       console.error('Failed to Remove Chef');
     }
@@ -219,6 +242,10 @@ const AdminPage = () => {
   
   const filteredChefs = chefs.filter(chef =>
     chef.user_name.toLowerCase().includes(chefsearchTerm.toLowerCase())
+  );
+
+  const filteredReports = reports.filter(report =>
+    report.title.toLowerCase().includes(reportsearchTerm.toLowerCase())
   );
 
   const sectionContainerStyle = {
@@ -383,12 +410,11 @@ const AdminPage = () => {
             style={inputStyle}
             />
             <div style={{overflowY: 'auto'}}>
-              {availableReports.map((report, index) =>(
+              {filteredReports.map((report, index) =>(
                 <div key = {index} style = {itemStyle} onClick={() => selectReport(report.title)}>
                   {report.title}
                 </div>
               ))}
-
             </div>
         </div>
 
