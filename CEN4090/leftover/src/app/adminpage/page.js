@@ -10,10 +10,12 @@ const AdminPage = () => {
   const [recipes, setRecipes] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [chefs, setChefs] = useState([]);
+  const [reports, setReports] = useState([]);
   const [ingredientsearchTerm, setingredientsearchTerm] = useState('');
   const [recipesearchTerm, setrecipesearchTerm] = useState('');
   const [usersearchTerm, setusersearchTerm] = useState('');
   const [chefsearchTerm, setchefsearchTerm] = useState('');
+  const [availableReports, setAvailableReports] = useState('');
 
   const handlefoodChange = (event) => {
     const { name, value } = event.target;
@@ -189,7 +191,7 @@ const AdminPage = () => {
   };
 
   function selectReport(reportID) { //this has to be gotten in server.py
-    fetch(`http://localhost:8080/reports/${reportID}`, {
+    fetch(`http://localhost:8080/select_report/${reportID}`, {
       method: 'POST', // Assuming you're updating to use POST to match session handling
       credentials: 'include', // Important for sessions
     })
@@ -381,12 +383,11 @@ const AdminPage = () => {
             style={inputStyle}
             />
             <div style={{overflowY: 'auto'}}>
-              {filteredReports.map((report, index)) =>(
-                <div key = {index} style = {itemStle}> 
+              {availableReports.map((report, index) =>(
+                <div key = {index} style = {itemStyle} onClick={() => selectReport(report.title)}>
                   {report.title}
-                  <button onClick={AdminPage() => viewReport(report.title)} style={{...buttonStyle, backgroundColor: '#f44336'}}>View Report</button>
                 </div>
-              )}
+              ))}
 
             </div>
         </div>

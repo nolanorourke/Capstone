@@ -681,22 +681,38 @@ def get_all_recipes():
         cur.close()
         conn.close()
         
+#reports
 @app.route('/reports/all', methods=['GET'])
-def get_all_recipes():
+def get_all_reports():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT recipe_id, recipe_name FROM Recipes")
-        recipes = [{'recipe_id': row[0], 'recipe_name': row[1]} for row in cur.fetchall()]
-        return jsonify(recipes)
+        cur.execute("SELECT report_id, title FROM Reports")
+        reports = [{'report_id': row[0], 'title': row[1]} for row in cur.fetchall()]
+        return jsonify(reports)
     except Exception as e:
-        print(f"Error fetching all recipes: {e}")
+        print(f"Error fetching all reports: {e}")
         return jsonify({'error': 'Internal Server Error'}), 500
     finally:
         cur.close()
         conn.close()
+
+@app.route('/select_report/<int:report_id>', methods=['POST'])
+def select_report(report_id):
+    print("Selecting report ID:", report_id)  # Debug print
+    if 'username' in session:
+        session['selected_report_id'] = report_id
+        print("Report selected successfully, ID stored in session:", session['selected_report_id'])  # Confirm success
+        return jsonify({'success': True}), 200
+    else:
+        print("Failed to select report, no username in session")  # Identify failure
+        return jsonify({'error': 'Unauthorized'}), 401
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
