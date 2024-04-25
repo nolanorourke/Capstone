@@ -221,7 +221,7 @@ const AdminPage = () => {
     .then(response => {
       if(response.ok) {
         // Navigate to the generic /recipe URL after successful selection
-        window.location.href = '/reportPage';
+        window.location.href = '/SubmittedReportsPage';
       } else {
         alert("Failed to select report");
       }

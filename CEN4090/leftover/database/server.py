@@ -710,7 +710,57 @@ def select_report(report_id):
     else:
         print("Failed to select report, no username in session")  # Identify failure
         return jsonify({'error': 'Unauthorized'}), 401
+    
+@app.route('/SubmittedReportsPage', methods=['GET'])
+def get_recipe_details():
+    if 'username' not in session or 'selected_recipe_id' not in session:
+        return jsonify({'error': 'No recipe selected or unauthorized'}), 401
 
+    recipe_id = session['selected_recipe_id']
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # Fetch recipe details along with the author's name
+        cur.execute("SELECT r.recipe_name, u.first_name, u.last_name, r.time_added \
+        FROM Recipes r \
+        JOIN Users u ON r.author = u.username \
+        WHERE r.recipe_id = %s \
+        ", (recipe_id,))
+        recipe = cur.fetchone()
+
+        # Fetch ingredients for the selected recipe
+        cur.execute("SELECT ing_name, quantity, measurement \
+        FROM Recipe_Ingredients \
+        WHERE recipe_id = %s \
+        ", (recipe_id,))
+        ingredients = cur.fetchall()
+
+        # Fetch steps for the selected recipe
+        cur.execute("SELECT step_number, step_description \
+        FROM Steps \
+        WHERE recipe_id = %s \
+        ORDER BY step_number \
+        ", (recipe_id,))
+        steps = cur.fetchall()
+
+        recipe_details = {
+            'recipe_name': recipe[0],
+            'author': f"{recipe[1]} {recipe[2]}",
+            'time_added': recipe[3],
+            'ingredients': [{'food_name': ing[0], 'quantity': ing[1], 'measurement': ing[2]} for ing in ingredients],
+            'steps': [{'step_number': step[0], 'description': step[1]} for step in steps]
+        }
+
+        return jsonify(recipe_details)
+
+    except Exception as e:
+        print(f"Error fetching recipe details: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+    finally:
+        cur.close()
+        conn.close()
 @app.route('/getreports', methods=['GET'])
 def get_reports():
     conn = get_db_connection()
