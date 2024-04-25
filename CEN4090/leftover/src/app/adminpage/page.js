@@ -188,6 +188,21 @@ const AdminPage = () => {
     }
   };
 
+  function selectReport(reportID) { //this has to be gotten in server.py
+    fetch(`http://localhost:8080/reports/${reportID}`, {
+      method: 'POST', // Assuming you're updating to use POST to match session handling
+      credentials: 'include', // Important for sessions
+    })
+    .then(response => {
+      if(response.ok) {
+        // Navigate to the generic /recipe URL after successful selection
+        window.location.href = '/reportPage';
+      } else {
+        alert("Failed to select report");
+      }
+    });
+  }
+
   const filteredFoods = foods.filter(food =>
     food.food_name.toLowerCase().includes(ingredientsearchTerm.toLowerCase())
   );
@@ -355,6 +370,25 @@ const AdminPage = () => {
               </div>
             ))}
           </div>
+        </div>
+        <div style={sectionStyle}>
+            <h2 align="center">Reports</h2>
+            <input
+            type="text"
+            placeholder = "Search Reports..."
+            value={reportsearchTerm}
+            onChange = {handleReportChange}
+            style={inputStyle}
+            />
+            <div style={{overflowY: 'auto'}}>
+              {filteredReports.map((report, index)) =>(
+                <div key = {index} style = {itemStle}> 
+                  {report.title}
+                  <button onClick={AdminPage() => viewReport(report.title)} style={{...buttonStyle, backgroundColor: '#f44336'}}>View Report</button>
+                </div>
+              )}
+
+            </div>
         </div>
 
       </div>
