@@ -411,7 +411,7 @@ const AdminPage = () => {
             />
             <div style={{overflowY: 'auto'}}>
               {filteredReports.map((report, index) =>(
-                <div key = {index} style = {itemStyle} onClick={() => selectReport(report.title)}>
+                <div key = {index} style = {itemStyle} onClick={() => selectReport(report.Report_ID)}>
                   {report.title}
                 </div>
               ))}

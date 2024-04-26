@@ -757,15 +757,11 @@ def get_report():
 def get_reports():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT title, rolname \
-                FROM pg_user \
-                INNER JOIN pg_auth_members ON pg_user.usesysid = pg_auth_members.member \
-                INNER JOIN pg_roles ON pg_roles.oid = pg_auth_members.roleid \
-                WHERE pg_roles.rolname = 'chef'")
-    chefs = cur.fetchall()
+    cur.execute("SELECT * FROM Reports")
+    reports = cur.fetchall()
     cur.close()
     conn.close()
-    return jsonify([{'user_name': chef[0], 'role': chef[1]} for chef in chefs])
+    return jsonify([{'Report_ID': report[0], 'CHEFNAME': report[1], 'Reporter': report[2],'title': report[3],'Report':report[4]} for report in reports])
 
 #to be used in admin to view reports
 @app.route('/select_report/<int:report_id>', methods=['POST'])

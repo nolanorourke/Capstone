@@ -89,7 +89,7 @@ const RecipePage = () => {
           width = {20}
           height = {20}
           />
-        <Link  href="ReportPage" style = {{backgroundColor: '#F0F0F0', color: 'red'}}>Report this Recipe</Link>
+        <Link  href="/reportPage" style = {{backgroundColor: '#F0F0F0', color: 'red'}}>Report this Recipe</Link>
       </div>
     </div>
   );
