@@ -213,20 +213,17 @@ const AdminPage = () => {
     }
   };
 
-  function selectReport(reportID) { //this has to be gotten in server.py
-    fetch(`http://localhost:8080/select_report/${reportID}`, {
-      method: 'POST', // Assuming you're updating to use POST to match session handling
-      credentials: 'include', // Important for sessions
-    })
-    .then(response => {
-      if(response.ok) {
-        // Navigate to the generic /recipe URL after successful selection
-        window.location.href = '/SubmittedReportsPage';
-      } else {
-        alert("Failed to select report");
-      }
+  const selectReport = async (recipeTitle) => {
+    const response = await fetch(`http://localhost:8080/select_report/${encodeURIComponent(recipeTitle)}`, {
+        method: 'POST',
+        credentials: 'include',
     });
-  }
+    if (response.ok) {
+        window.location.href = '/SubmittedReportsPage';  // Assuming this page will handle displaying the selected report.
+    } else {
+        alert("Failed to select report");
+    }
+};
 
   const filteredFoods = foods.filter(food =>
     food.food_name.toLowerCase().includes(ingredientsearchTerm.toLowerCase())
@@ -411,8 +408,10 @@ const AdminPage = () => {
             />
             <div style={{overflowY: 'auto'}}>
               {filteredReports.map((report, index) =>(
-                <div key = {index} style = {itemStyle} onClick={() => selectReport(report.Report_ID)}>
+                <div key = {index} style = {itemStyle} onClick={() => selectReport(report.Recipe_title)}>
                   {report.title}
+                  -
+                  {report.Reporter}
                 </div>
               ))}
             </div>

@@ -277,30 +277,25 @@ def get_recipes():
     return jsonify([{'recipe_name': recipe[0], 'author': recipe[1]} for recipe in recipes])
 
 @app.route('/deletechefrecipe', methods=['POST'])
-def delete_recipe():
+def delete_chef_recipe():
     conn = get_db_connection()
     cur = conn.cursor()
     data = request.json
-    print(data)
     try:
-
-        cur.execute("SELECT * FROM Recipes WHERE recipe_name = '" + str(data['recipe_name']) + "'")
+        cur.execute("SELECT * FROM Recipes WHERE recipe_name = %s", (data['recipe_name'],))
         recipe = cur.fetchone()
-        print(recipe)
-        cur.execute("DELETE FROM Recipe_Foods WHERE recipe_id = " + str(recipe[0]))
-        conn.commit()
-        cur.execute("DELETE FROM Recipe_Ingredients WHERE recipe_id = " + str(recipe[0]))
-        conn.commit()
-        cur.execute("DELETE FROM Steps WHERE recipe_id = " + str(recipe[0]))
-        conn.commit()
-        print("Deleted Data Pertaining Recipes")
-        cur.execute("DELETE FROM Recipes WHERE recipe_name = '" + str(data['recipe_name']) + "'")
-        conn.commit()
-        print("Deleted Recipe")
-        return jsonify({'message': 'Recipe Successfully Removed'}), 200
+        if recipe:
+            cur.execute("DELETE FROM Recipe_Foods WHERE recipe_id = %s", (recipe[0],))
+            cur.execute("DELETE FROM Recipe_Ingredients WHERE recipe_id = %s", (recipe[0],))
+            cur.execute("DELETE FROM Steps WHERE recipe_id = %s", (recipe[0],))
+            cur.execute("DELETE FROM Recipes WHERE recipe_id = %s", (recipe[0],))
+            conn.commit()
+            return jsonify({'message': 'Recipe Successfully Removed'}), 200
+        else:
+            return jsonify({'error': 'Recipe not found'}), 404
     except Exception as e:
-        print(f"Error Removing Recipe: {e}")
-        return jsonify({'error': 'Internal Server Error'}), 500
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
     finally:
         cur.close()
         conn.close()
@@ -662,6 +657,64 @@ def welcome_user():  # Removed the username parameter
         return jsonify(user_info)
     else:
         return jsonify({'error': 'User not found'}), 404
+
+
+
+@app.route('/delete_recipe/<recipe_title>', methods=['POST'])
+def delete_recipe_by_title(recipe_title):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT recipe_id FROM Recipes WHERE recipe_name = %s", (recipe_title,))
+        recipe = cur.fetchone()
+        if recipe is None:
+            return jsonify({'message': 'Recipe not found'}), 404
+        
+        recipe_id = recipe[0]
+
+        cur.execute("DELETE FROM Recipe_Foods WHERE recipe_id = %s", (recipe_id,))
+        cur.execute("DELETE FROM Recipe_Ingredients WHERE recipe_id = %s", (recipe_id,))
+        cur.execute("DELETE FROM Steps WHERE recipe_id = %s", (recipe_id,))
+
+        cur.execute("DELETE FROM Reports WHERE recipe_title = %s", (recipe_title,))
+
+        cur.execute("DELETE FROM Recipes WHERE recipe_id = %s", (recipe_id,))
+        
+        conn.commit()
+        return jsonify({'message': 'Recipe and associated reports successfully deleted'}), 200
+    except Exception as e:
+        conn.rollback()
+        app.logger.error(f"Error deleting recipe and reports: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/delete_report/<int:report_id>', methods=['POST'])
+def delete_report(report_id):
+    if 'username' not in session:
+        app.logger.error("Unauthorized access attempt.")
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    app.logger.info(f"User {session['username']} is deleting report {report_id}")
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM Reports WHERE report_id = %s", (report_id,))
+        conn.commit()
+        return jsonify({'message': 'Report successfully deleted'}), 200
+    except Exception as e:
+        conn.rollback()
+        app.logger.error(f"Error deleting report: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
+
     
 @app.route('/recipes/all', methods=['GET'])
 def get_all_recipes():
@@ -703,55 +756,26 @@ def get_all_reports():
     
 @app.route('/SubmittedReportsPage', methods=['GET'])
 def get_report():
-    if 'username' not in session or 'selected_report_id' not in session:
+    if 'username' not in session or 'selected_report_title' not in session:
         return jsonify({'error': 'No report selected or unauthorized'}), 401
 
-    recipe_id = session['selected_report_id']
+    recipe_title = session['selected_report_title']
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
-        # Fetch recipe details along with the author's name
-        cur.execute("SELECT r.recipe_name, u.first_name, u.last_name, r.time_added \
-        FROM Recipes r \
-        JOIN Users u ON r.author = u.username \
-        WHERE r.recipe_id = %s \
-        ", (recipe_id,))
-        recipe = cur.fetchone()
-
-        # Fetch ingredients for the selected recipe
-        cur.execute("SELECT ing_name, quantity, measurement \
-        FROM Recipe_Ingredients \
-        WHERE recipe_id = %s \
-        ", (recipe_id,))
-        ingredients = cur.fetchall()
-
-        # Fetch steps for the selected recipe
-        cur.execute("SELECT step_number, step_description \
-        FROM Steps \
-        WHERE recipe_id = %s \
-        ORDER BY step_number \
-        ", (recipe_id,))
-        steps = cur.fetchall()
-
-        recipe_details = {
-            'recipe_name': recipe[0],
-            'author': f"{recipe[1]} {recipe[2]}",
-            
-            'time_added': recipe[3],
-            'ingredients': [{'food_name': ing[0], 'quantity': ing[1], 'measurement': ing[2]} for ing in ingredients],
-            'steps': [{'step_number': step[0], 'description': step[1]} for step in steps]
-        }
-
-        return jsonify(recipe_details)
-
+        # Assuming the reports can be multiple for a single title, adjust if only one is expected
+        cur.execute("SELECT report_id, recipe_title, reporter, title, report FROM Reports WHERE recipe_title = %s", (recipe_title,))
+        report_details = cur.fetchall()
+        reports = [{'report_id': rd[0], 'recipe_title': rd[1], 'reporter': rd[2], 'title': rd[3], 'report': rd[4]} for rd in report_details]
+        return jsonify(reports)
     except Exception as e:
-        print(f"Error fetching recipe details: {e}")
+        print(f"Error fetching report details: {e}")
         return jsonify({'error': 'Internal Server Error'}), 500
-
     finally:
         cur.close()
         conn.close()
+
 
 @app.route('/getreports', methods=['GET'])
 def get_reports():
@@ -761,19 +785,18 @@ def get_reports():
     reports = cur.fetchall()
     cur.close()
     conn.close()
-    return jsonify([{'Report_ID': report[0], 'CHEFNAME': report[1], 'Reporter': report[2],'title': report[3],'Report':report[4]} for report in reports])
-
-#to be used in admin to view reports
-@app.route('/select_report/<int:report_id>', methods=['POST'])
-def select_report(report_id):
-    print("Selecting report ID:", report_id)  # Debug print
-    if 'username' in session:
-        session['selected_report_id'] = report_id
-        print("Report selected successfully, ID stored in session:", session['selected_report_id'])  # Confirm success
-        return jsonify({'success': True}), 200
-    else:
+    return jsonify([{'Report_ID': report[0], 'Recipe_title': report[1], 'Reporter': report[2],'title': report[3],'Report':report[4]} for report in reports])
+ 
+@app.route('/select_report/<recipe_title>', methods=['POST'])
+def select_report(recipe_title):
+    if 'username' not in session:
         print("Failed to select report, no username in session")  # Identify failure
         return jsonify({'error': 'Unauthorized'}), 401
+    
+    session['selected_report_title'] = recipe_title
+    print("Report selected successfully, title stored in session:", session['selected_report_title'])  # Confirm success
+    return jsonify({'success': True}), 200
+
 
 @app.route('/addreport', methods=['POST'])
 def add_report():
@@ -785,8 +808,8 @@ def add_report():
     data = request.json
     try:
         # Insert the recipe into the Recipes table
-        cur.execute("INSERT INTO Reports (reporter, title, report) VALUES (%s, %s, %s)",
-                    (session['username'], data['report_title'], data['description']))
+        cur.execute("INSERT INTO Reports (recipe_title, reporter, title, report) VALUES (%s, %s, %s, %s)",
+                    (data['recipe_title'], session['username'], data['report_title'], data['description']))
         # Get the recipe_id of the inserted recipe
         cur.execute("SELECT lastval()")
         report_id = cur.fetchone()[0]
@@ -819,7 +842,6 @@ def get_report_details():
         # Fetch recipe details along with the author's name
         cur.execute("SELECT r.title, r.report, u.first_name, u.last_name \
         FROM Reports r \
-        JOIN Users u ON r.chefname = u.username \
         WHERE r.recipe_id = %s \
         ", (recipe_id,))
         report = cur.fetchone()
@@ -837,6 +859,9 @@ def get_report_details():
     finally:
         cur.close()
         conn.close()
+
+
+
 
 
 if __name__ == '__main__':
