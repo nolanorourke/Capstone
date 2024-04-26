@@ -26,6 +26,7 @@ Leftover is way to digitally keep track of what ingredients you have availabe wh
 - Role Based Access
 - **Report System**
 - **Filter Foods**
+- **General Recipes Page**
 
 ## Run Locally
 
