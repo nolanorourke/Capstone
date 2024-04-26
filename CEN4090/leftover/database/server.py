@@ -553,6 +553,7 @@ def get_recipe_details():
         recipe_details = {
             'recipe_name': recipe[0],
             'author': f"{recipe[1]} {recipe[2]}",
+            'recipe_id': recipe_id,
             'time_added': recipe[3],
             'ingredients': [{'food_name': ing[0], 'quantity': ing[1], 'measurement': ing[2]} for ing in ingredients],
             'steps': [{'step_number': step[0], 'description': step[1]} for step in steps]
@@ -700,23 +701,13 @@ def get_all_reports():
         cur.close()
         conn.close()
 
-@app.route('/select_report/<int:report_id>', methods=['POST'])
-def select_report(report_id):
-    print("Selecting report ID:", report_id)  # Debug print
-    if 'username' in session:
-        session['selected_report_id'] = report_id
-        print("Report selected successfully, ID stored in session:", session['selected_report_id'])  # Confirm success
-        return jsonify({'success': True}), 200
-    else:
-        print("Failed to select report, no username in session")  # Identify failure
-        return jsonify({'error': 'Unauthorized'}), 401
     
 @app.route('/SubmittedReportsPage', methods=['GET'])
-def get_recipe_details():
-    if 'username' not in session or 'selected_recipe_id' not in session:
-        return jsonify({'error': 'No recipe selected or unauthorized'}), 401
+def get_report():
+    if 'username' not in session or 'selected_report_id' not in session:
+        return jsonify({'error': 'No report selected or unauthorized'}), 401
 
-    recipe_id = session['selected_recipe_id']
+    recipe_id = session['selected_report_id']
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -747,6 +738,7 @@ def get_recipe_details():
         recipe_details = {
             'recipe_name': recipe[0],
             'author': f"{recipe[1]} {recipe[2]}",
+            
             'time_added': recipe[3],
             'ingredients': [{'food_name': ing[0], 'quantity': ing[1], 'measurement': ing[2]} for ing in ingredients],
             'steps': [{'step_number': step[0], 'description': step[1]} for step in steps]
@@ -761,6 +753,7 @@ def get_recipe_details():
     finally:
         cur.close()
         conn.close()
+
 @app.route('/getreports', methods=['GET'])
 def get_reports():
     conn = get_db_connection()
@@ -775,6 +768,80 @@ def get_reports():
     conn.close()
     return jsonify([{'user_name': chef[0], 'role': chef[1]} for chef in chefs])
 
+#to be used in admin to view reports
+@app.route('/select_report/<int:report_id>', methods=['POST'])
+def select_report(report_id):
+    print("Selecting report ID:", report_id)  # Debug print
+    if 'username' in session:
+        session['selected_report_id'] = report_id
+        print("Report selected successfully, ID stored in session:", session['selected_report_id'])  # Confirm success
+        return jsonify({'success': True}), 200
+    else:
+        print("Failed to select report, no username in session")  # Identify failure
+        return jsonify({'error': 'Unauthorized'}), 401
+
+@app.route('/addreport', methods=['POST'])
+def add_report():
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    data = request.json
+    try:
+        # Insert the recipe into the Recipes table
+        cur.execute("INSERT INTO Reports (recipe_id, chefname, reporter, title, report) VALUES ( %s, %s, %s, %s, %s)",
+                    (data['recipeID'], data['recipeAuthor'], session['username'], data['report_title'], data['description']))
+        # Get the recipe_id of the inserted recipe
+        cur.execute("SELECT lastval()")
+        report_id = cur.fetchone()[0]
+
+        conn.commit()
+        return jsonify({'message': 'Report added successfully', 'report_id': report_id}), 200
+    except Exception as e:
+        print(f"Error adding report: {e}")
+        conn.rollback()
+        return jsonify({'error': 'Internal Server Error'}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/report', methods=['POST'])
+def createReport():
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+@app.route('/submittedReports', methods=['GET'])
+def get_report_details():
+    if 'username' not in session or 'selected_report_id' not in session:
+        return jsonify({'error': 'No report selected or unauthorized'}), 401
+
+    recipe_id = session['selected_report_id']
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # Fetch recipe details along with the author's name
+        cur.execute("SELECT r.title, r.report, u.first_name, u.last_name \
+        FROM Reports r \
+        JOIN Users u ON r.chefname = u.username \
+        WHERE r.recipe_id = %s \
+        ", (recipe_id,))
+        report = cur.fetchone()
+        report_details = {
+            'title': report[0],
+            'description': report[1],
+            'chefname': f"{report[2]} {report[3]}"
+        }
+        return jsonify(report_details)
+
+    except Exception as e:
+        print(f"Error fetching recipe details: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+    finally:
+        cur.close()
+        conn.close()
 
 
 if __name__ == '__main__':

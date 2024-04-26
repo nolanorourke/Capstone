@@ -1,5 +1,7 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useCallback} from 'react';
+import Link from "next/link";
+import Image from "next/image";
 
 const RecipePage = () => {
   const [recipeDetails, setRecipeDetails] = useState(null);
@@ -43,8 +45,22 @@ const RecipePage = () => {
     fetchRecipeDetails();
   }, []);
 
-  function reportRecipe(recipeId, recipeAuthor, reporter) {
-    fetch(`http://localhost:8080/create_report/${recipeId}`, {
+  // function selectReport(recipeId, recipeAutho) {
+  //   fetch(`http://localhost:8080/select_report/${recipeId} `, {
+  //     method: 'POST', 
+  //     credentials: 'include', 
+  //   })
+  //   .then(response => {
+  //     if(response.ok) {
+  //       window.location.href = '/ReportPage';
+  //     } else {
+  //       alert("Failed to select recipe");
+  //     }
+  //   });
+  // }
+
+  function reportRecipe(reportId) {
+    fetch(`http://localhost:8080/addreport/${reportId}`, {
       method: 'POST', // Assuming you're updating to use POST to match session handling
       credentials: 'include', // Important for sessions
     })
@@ -85,8 +101,20 @@ const RecipePage = () => {
         <p>Recipe by: <strong>{recipeDetails.author}</strong></p>
       </div>
       <div style={{ position: 'absolute', bottom: '10px', right: '10px', display: 'flex', alignItems: 'center' }}>
-        <img src="./warning.png" alt="Report" style={{ width: '20px', marginRight: '5px' }} />
-        <li><Link href="/ReportPage">Report this Recipe</Link></li>
+        {/* <img src="/warning.png" alt="Report" style={{ width: '20px', marginRight: '5px' }} /> */}
+        {/* <button onclick = "window.location.href='/ReportPage'">Report this Recipe</button> */}
+        {/* <button onClick = {()=> reportRecipe(recipeDetails.recipe_id)}>Report this recipe</button> */}
+        {/* <li><Link to={{pathname: '/ReportPage', state: { recipeId: recipeDetails.recipe_id, author: recipeDetails.author }}}>Report this Recipe</Link></li> */}
+        <Image
+          src="/warning.png"
+          width = {20}
+          height = {20}
+          />
+        <Link  href={{pathname: "/ReportPage", state:{recipe_id: recipeDetails.recipe_id, author: recipeDetails.author}}} 
+        style = {{backgroundColor: '#F0F0F0', color: 'red'}}
+        >
+          Report this Recipe</Link>
+
       </div>
     </div>
   );
