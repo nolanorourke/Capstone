@@ -8,27 +8,6 @@ const RecipePage = () => {
   const [user, setUser] = useState('');
 
 
-  const fetchUsersRole = useCallback(async () => {
-    const response = await fetch('http://localhost:8080/check_session', {
-      credentials: 'include',
-    });
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-      if(data.username){
-        setUser(data);
-      }else{
-        setUser(null);
-      }
-      setLoading(false);
-    } else {
-      console.error('Failed to fetch user role');
-    }
-  }, []);
-  useEffect(() => {
-    fetchUsersRole();
-    }, []);
-
   useEffect(() => {
     const fetchRecipeDetails = async () => {
       const response = await fetch(`http://localhost:8080/recipe`, {
@@ -59,20 +38,20 @@ const RecipePage = () => {
   //   });
   // }
 
-  function reportRecipe(reportId) {
-    fetch(`http://localhost:8080/addreport/${reportId}`, {
-      method: 'POST', // Assuming you're updating to use POST to match session handling
-      credentials: 'include', // Important for sessions
-    })
-    .then(response => {
-      if(response.ok) {
-        // Navigate to the generic /recipe URL after successful selection
-        window.location.href = '/recipe';
-      } else {
-        alert("Failed to select recipe");
-      }
-    });
-  }
+  // function reportRecipe(reportId) {
+  //   fetch(`http://localhost:8080/addreport/${reportId}`, {
+  //     method: 'POST', // Assuming you're updating to use POST to match session handling
+  //     credentials: 'include', // Important for sessions
+  //   })
+  //   .then(response => {
+  //     if(response.ok) {
+  //       // Navigate to the generic /recipe URL after successful selection
+  //       window.location.href = '/recipe';
+  //     } else {
+  //       alert("Failed to select recipe");
+  //     }
+  //   });
+  // }
 
   if (!recipeDetails) {
     return <p style={{ textAlign: 'center', fontSize: '20px' }}>Loading...</p>;
@@ -110,7 +89,7 @@ const RecipePage = () => {
           width = {20}
           height = {20}
           />
-        <Link  href="/ReportPage" style = {{backgroundColor: '#F0F0F0', color: 'red'}}>Report this Recipe</Link>
+        <Link  href="ReportPage" style = {{backgroundColor: '#F0F0F0', color: 'red'}}>Report this Recipe</Link>
       </div>
     </div>
   );

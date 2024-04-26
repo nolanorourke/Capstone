@@ -6,6 +6,7 @@ import Header from './components/Header';
 import LoginPage from './login/LoginPage';
 import RegisterPage from './register/RegisterPage';
 import UserPage from './user/UserPage';
+import ReportPage from './ReportPage/ReportPage'
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/user" element={<UserPage />} />
           <Route path="/recipe" element={<RegisterPage />} />
+          <Route path="/ReportPage" element={<ReportPage />}/>
           {/* Define other routes as needed */}
         </Routes>
       </div>

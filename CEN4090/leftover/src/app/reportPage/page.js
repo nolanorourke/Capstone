@@ -4,11 +4,6 @@ import React, { useEffect, useState } from 'react';
 const ReportPage = () => {
     const[reportTitle, setReportTitle] = useState('');
     const[reportDescription, setReportDescription] = useState('');
- 
-    useEffect(() => {
-        console.log('Recipe ID:', recipe_id);
-        console.log('Author:', author);
-      }, [recipe_id, author]);
       
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,7 +29,6 @@ const ReportPage = () => {
         });
 
         if (response.ok) {
-            fetchChefRecipes();
             // Recipe added successfully
             console.log('Report added successfully');
             // Resetting form fields or any other necessary actions

@@ -133,7 +133,7 @@ const AdminPage = () => {
   }, []);
 
   const fetchReports = async() =>{
-    const response = await fetch('http://localhose:8080', {
+    const response = await fetch('http://localhost:8080/getreports', {
       credentials: 'include',
     });
     if (response.ok){
