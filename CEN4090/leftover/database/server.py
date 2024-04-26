@@ -553,7 +553,6 @@ def get_recipe_details():
         recipe_details = {
             'recipe_name': recipe[0],
             'author': f"{recipe[1]} {recipe[2]}",
-            'recipe_id': recipe_id,
             'time_added': recipe[3],
             'ingredients': [{'food_name': ing[0], 'quantity': ing[1], 'measurement': ing[2]} for ing in ingredients],
             'steps': [{'step_number': step[0], 'description': step[1]} for step in steps]
@@ -790,8 +789,8 @@ def add_report():
     data = request.json
     try:
         # Insert the recipe into the Recipes table
-        cur.execute("INSERT INTO Reports (recipe_id, chefname, reporter, title, report) VALUES ( %s, %s, %s, %s, %s)",
-                    (data['recipeID'], data['recipeAuthor'], session['username'], data['report_title'], data['description']))
+        cur.execute("INSERT INTO Reports (reporter, title, report) VALUES (%s, %s, %s)",
+                    (session['username'], data['report_title'], data['description']))
         # Get the recipe_id of the inserted recipe
         cur.execute("SELECT lastval()")
         report_id = cur.fetchone()[0]

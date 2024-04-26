@@ -1,13 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 
-const ReportPage = ({location}) => {
-    const state = location ? location.state : null;
-    const recipeId = state ? state.recipeId : null;
-    const author = state ? state.author : null;    
+const ReportPage = () => {
     const[reportTitle, setReportTitle] = useState('');
     const[reportDescription, setReportDescription] = useState('');
  
+    useEffect(() => {
+        console.log('Recipe ID:', recipe_id);
+        console.log('Author:', author);
+      }, [recipe_id, author]);
+      
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -16,15 +18,11 @@ const ReportPage = ({location}) => {
       return;
     }
 
-    const author = sessionStorage.getItem('username');
     // Constructing the recipe data
     const reportData = {
         report_title: reportTitle,
-        recipeAuthor: author,
-        recipeID:recipeId,
         description:reportDescription
     };
-    console.log(recipeId);
 
     try {
         // Sending the recipe data to the backend
@@ -64,7 +62,7 @@ const ReportPage = ({location}) => {
         />
         <h2 align="center">Description</h2>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-        <textarea style={{ width: 'calc(100%)', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} placeholder= 'Enter report details...' onChange={(e) => setReportDescription(e.target.value)}/> 
+        <textarea style={{ width: 'calc(100%)', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} placeholder= 'Enter report title and author with report...' onChange={(e) => setReportDescription(e.target.value)}/> 
         </div>
         <button onClick={handleSubmit}  style={{ padding: '10px', border: 'none', marginTop: '50px', borderRadius: '6px', cursor: 'pointer', backgroundColor: '#4CAF50', color: 'white', transition: 'background-color 0.3s' }}>Submit Report</button>
       </div>

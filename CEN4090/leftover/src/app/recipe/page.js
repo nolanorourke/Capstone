@@ -110,11 +110,7 @@ const RecipePage = () => {
           width = {20}
           height = {20}
           />
-        <Link  href={{pathname: "/ReportPage", state:{recipe_id: recipeDetails.recipe_id, author: recipeDetails.author}}} 
-        style = {{backgroundColor: '#F0F0F0', color: 'red'}}
-        >
-          Report this Recipe</Link>
-
+        <Link  href="/ReportPage" style = {{backgroundColor: '#F0F0F0', color: 'red'}}>Report this Recipe</Link>
       </div>
     </div>
   );
