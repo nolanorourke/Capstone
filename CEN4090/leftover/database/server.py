@@ -764,7 +764,6 @@ def get_report():
     cur = conn.cursor()
 
     try:
-        # Assuming the reports can be multiple for a single title, adjust if only one is expected
         cur.execute("SELECT report_id, recipe_title, reporter, title, report FROM Reports WHERE recipe_title = %s", (recipe_title,))
         report_details = cur.fetchall()
         reports = [{'report_id': rd[0], 'recipe_title': rd[1], 'reporter': rd[2], 'title': rd[3], 'report': rd[4]} for rd in report_details]
